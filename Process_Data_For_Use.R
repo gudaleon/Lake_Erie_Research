@@ -1,6 +1,9 @@
+## Project:  Prediction of harmful water quality parameters combining weather, air quality and ecosystem models with in-situ measurements
+## Catherine Nowakowski
+
 #############################################################################################
 ## Making list of Variables and File names
-## To check variable names use print(nc)
+## Note To check variable names use print(nc)
 
 var_names <- c("Radiation", "Tmax", "Tmin", "Precipitation", "R_humidity", "Windspeed", 
                "Dry_Oxidized_ND", "Dry_Reduced_ND", "Wet_Oxidized_ND", "Wet_Reduced_ND", 
