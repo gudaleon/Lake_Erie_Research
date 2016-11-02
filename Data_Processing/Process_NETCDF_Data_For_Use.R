@@ -15,7 +15,12 @@
 
 #############################################################################################
 ## Making list of Variables and File names
-## To find variable names use print(nc)
+## To find variable names:
+# print("Opening NetCDF")
+# nc <- nc_open(File)
+# print(nc)
+# print("Close file")
+# nc_close(nc)
 
 var_names <- c("Radiation", "Tmax", "Tmin", "Precipitation", "R_humidity", "Windspeed", 
                "Dry_Oxidized_ND", "Dry_Reduced_ND", "Wet_Oxidized_ND", "Wet_Reduced_ND", 
