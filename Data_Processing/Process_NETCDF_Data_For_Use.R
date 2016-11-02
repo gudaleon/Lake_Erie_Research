@@ -1,9 +1,21 @@
+## Catrina Nowakowski
+## Summer 2016 - November 2016
+
 ## Project:  Prediction of harmful water quality parameters combining weather, air quality and ecosystem models with in-situ measurements
-## Catherine Nowakowski
+
+## This script process NETCDF data output from CMAQ bidi 
+## Format:
+## Set Up lists of variables and File names
+## Function to pull them from NETCDF (Pull_Var)
+## Loop to apply Pull_Var
+## Function to convert Var to data frame (Mat_to_Data_Frame)
+## Loop to apply Mat_to_Data_Frame *applys to all variables previously applied to Pull_Var
+##  because a list of variables was created in the Pull_Var loop
+## CSV FILES WILL BE FOUND IN WORKING DIRECTORY
 
 #############################################################################################
 ## Making list of Variables and File names
-## Note To check variable names use print(nc)
+## To find variable names use print(nc)
 
 var_names <- c("Radiation", "Tmax", "Tmin", "Precipitation", "R_humidity", "Windspeed", 
                "Dry_Oxidized_ND", "Dry_Reduced_ND", "Wet_Oxidized_ND", "Wet_Reduced_ND", 
@@ -65,32 +77,32 @@ for(The_Variable in var_names){
 i = i + 1
 }
 
-
-
 #############################################################################################
-## Turning the variable in to a data frame that I can use
+## Making a function to turning Each variable in to a data frame that I can use
+## CURRENTLY FORMATED TO PULL OUT THE LAKE ERIE AREA, FOR WHOLE COUNTRY OMIT THE REFINE SECTION
+## CURRENTLY FORMATED TO GRAB DAYS 121 THROUGH 300, CHANGE OR OMIT SECTION TO NEEDS
 
-
+Mat_to_Data_Frame <- function(Var, Lat_Long) {
 ## Stack the variable so all of the columns are under one another in order by day
 print("Stacking...")
-Radiation <- matrix(Radiation, ncol = 1) 
+Var <- matrix(Var, ncol = 1) 
 
 
 ## Puts in to to day by each column
 print("Splitting...")
-Radiation <- split(Radiation, 1:137241 )
+Var <- split(Var, 1:137241 )
 
 ## Makes it back in to a data frame
 print("To Data Frame...")
-Radiation <- as.data.frame(Radiation)
-Radiation <- t(Radiation)
+Var <- as.data.frame(Var)
+Var <- t(Var)
 print("To Data Frame again...")
-Radiation <- as.data.frame(Radiation)
+Var <- as.data.frame(Var)
 
 
 ## NA values to 0
 print("NA to Zero...")
-Radiation[is.na(Radiation)] <- "0"
+Var[is.na(Var)] <- "0"
 
 #############################################################################################
 ## Renaming Data Frames:
@@ -101,13 +113,13 @@ i <- 1
 
 # Loop to chang column name
 for(j in 1:365){
-  names(Radiation)[i]<-  paste0("day_",j)
+  names(Var)[i]<-  paste0("day_",j)
   i <- i + 1
 }
 
 #############################################################################################
 ## Grabing days 121 through 300:
-Radiation <- Radiation[,121:300]
+Var <- Var[,121:300]
 
 #############################################################################################
 ## Load the longitude and Latitude for all files
@@ -119,8 +131,8 @@ Lat_Long <- read.csv("longitude_latitude.csv", header = TRUE)
 ## Adding Lat and Lon
 print("Adding Latitude and Longitude Columns")
 
-Radiation$Lat <-Lat_Long$Latitude
-Radiation$Long <-Lat_Long$Longitude
+Var$Lat <-Lat_Long$Latitude
+Var$Long <-Lat_Long$Longitude
 
 #############################################################################################
 ## Refineing to Area of Intrest
@@ -131,17 +143,33 @@ Long_Start <- -85.869140625
 Long_End   <- -77.673339
 
 
-Radiation <- Radiation[Radiation$Lat  > Lat_Start   &
-                         Radiation$Lat  < Lat_End     &
-                         Radiation$Long > Long_Start  &   
-                         Radiation$Long < Long_End, ] 
+Var <- Var[Var$Lat  > Lat_Start   &
+                         Var$Lat  < Lat_End     &
+                         Var$Long > Long_Start  &   
+                         Var$Long < Long_End, ] 
 
 print("writing csv") 
 ## To write a CSV file for input to Excel one might use
-write.table(Radiation, file = "Radiation.csv", sep = ",", col.names = NA,
+
+The_CSV_Name <- paste0(Var, ".csv")
+
+write.table(Var, file = The_CSV_Name, sep = ",", col.names = NA,
             qmethod = "double")
 
+return(Var)
 
 print("END")
+}
 
+#############################################################################################
+## Appling Mat_to_Data_Frame function to all variables to produce a CSV file with just one var 
+## and just for the area of intrest and date range
+## LOOK IN WORK DIRETORY FOR THE CSV FILE FOR EACH VARIABLE
 
+for(i in all_var_name){
+  
+  Var <- get(i)
+  a <- Mat_to_Data_Frame(Var, Lat_Long)
+  assign(i, a)
+  
+}
