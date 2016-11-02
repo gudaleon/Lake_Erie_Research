@@ -10,8 +10,16 @@
 ## Loop to apply Pull_Var
 ## Function to convert Var to data frame (Mat_to_Data_Frame)
 ## Loop to apply Mat_to_Data_Frame *applys to all variables previously applied to Pull_Var
-##  because a list of variables was created in the Pull_Var loop
+# because a list of variables was created in the Pull_Var loop
 ## CSV FILES WILL BE FOUND IN WORKING DIRECTORY
+
+## Note used lat_long file again, checked out and it all lines up correct!
+
+#############################################################################################
+## Load the longitude and Latitude for all files
+print("Reading Latitude and Longitude...")
+
+Lat_Long <- read.csv("longitude_latitude.csv", header = TRUE)
 
 #############################################################################################
 ## Making list of Variables and File names
@@ -21,6 +29,7 @@
 # print(nc)
 # print("Close file")
 # nc_close(nc)
+
 
 var_names <- c("Radiation", "Tmax", "Tmin", "Precipitation", "R_humidity", "Windspeed", 
                "Dry_Oxidized_ND", "Dry_Reduced_ND", "Wet_Oxidized_ND", "Wet_Reduced_ND", 
@@ -126,11 +135,6 @@ for(j in 1:365){
 ## Grabing days 121 through 300:
 Var <- Var[,121:300]
 
-#############################################################################################
-## Load the longitude and Latitude for all files
-print("Reading Latitude and Longitude...")
-
-Lat_Long <- read.csv("longitude_latitude.csv", header = TRUE)
 
 #############################################################################################
 ## Adding Lat and Lon
