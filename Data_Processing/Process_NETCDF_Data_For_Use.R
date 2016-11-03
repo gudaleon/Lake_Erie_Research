@@ -192,3 +192,11 @@ i = i + 1
 
 #############################################################################################
 
+
+#############################################################################################
+## Write a CSV file for input to Excel 
+print("writing csv") 
+The_CSV_Name <- "Var_Name_List.csv"
+
+write.table(all_var_name, file = The_CSV_Name, sep = ",", col.names = NA,
+            qmethod = "double")
