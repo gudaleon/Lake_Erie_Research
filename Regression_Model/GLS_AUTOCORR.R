@@ -4,6 +4,18 @@
 
 ## Currently updating this script form the summer. 
 
+## What if I do the p-val thing and then at the end test how many variables to use with BIC?? this just
+# BIC is not going to work becasue it will not konck out p-val issues and will favor correlations between 
+# variables
+## Can I compair BIC after every iteration, that way if it is higher after slecting a new variable then 
+# it cuts the code off? After testing I think it may be better to use both BIC and ACI, BIC is harsh
+
+# Var i, best p
+# save bic i 1
+# Var i,j,
+# save bic i, j 1
+# see if bic i, j i is < i 1
+
 ###################################################################################################
 ## GLS
 ## With and With out Log
@@ -34,7 +46,7 @@ var_names_2 <- var_names
 ## This will be used to reflect on all of the model runs and choose the best ACI value
 
 ## Change to reflect ACI
-BIC_tracker_i <- matrix(NA, length(var_names))
+p_val_tracker_i <- matrix(NA, length(var_names))
 ###############################
 ## For Variable i
 
@@ -57,18 +69,17 @@ for(i in 1:length(var_names)){
   ## Produces a summery of the output, seperates the ACI Value and I don't think I need the corr table...
 ## FIX FOR ACI
   Summary_Output <- summary(regress_model)
-  BIC_Val_i <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_i[i] <- BIC_Val_i
- 
+  p_val_tracker_i[i] <- p_val$`p-value`[2]
 ## Ends the loop   
 }
 
 ## Picks the p-value closest to zero and finds its location in the tracker vector
-ii <- which.min(BIC_tracker_i)
+ii <-  which.min(abs(p_val_tracker_i - 0))
 ## Stors the value
-ii_Val <- BIC_tracker_i[ii]
+ii_Val <- p_val_tracker_i[ii]
 ## Stors the name
 ii_name <- var_names[ii]
 
@@ -79,8 +90,10 @@ df_i$variable_i <- df[[var_names[ii]]]
 var_names <- var_names[!var_names == ii_name]
 
 
+
+
 ## Initiates the tracker for the next variable Loop
-BIC_tracker_j <- matrix(NA, length(var_names))
+p_val_tracker_j <- matrix(NA, length(var_names))
 ###############################
 ## For j
 
@@ -96,15 +109,13 @@ for(j in 1:length(var_names)){
                        corr = corExp(form =~ Lat + Long | BiWeek)) 
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_j <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_j
-  BIC_tracker_j[j] <- BIC_Val_j
-  
-  ## Ends the loop
+  p_val_tracker_j[j] <- p_val$`p-value`[3]
 }
-jj <- which.min(abs(BIC_tracker_j - 0))
-jj_Val <- BIC_tracker_j[jj]
+jj <- which.min(abs(p_val_tracker_j - 0))
+jj_Val <- p_val_tracker_j[jj]
 jj_name <- var_names[jj]
 
 
@@ -113,7 +124,7 @@ df_i$variable_j <- df[[var_names[jj]]]
 
 var_names <- var_names[!var_names == jj_name]
 
-BIC_tracker_k <- matrix(NA, length(var_names))
+p_val_tracker_k <- matrix(NA, length(var_names))
 ###############################
 ## For K
 
@@ -127,15 +138,13 @@ for(k in 1:length(var_names)){
                        corr = corExp(form =~ Lat + Long | BiWeek)) 
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_k <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_k
-  BIC_tracker_k[k] <- BIC_Val_k
-  
-  ## Ends the loop
+  p_val_tracker_k[k] <- p_val$`p-value`[4]
 }
-kk <- which.min(abs(BIC_tracker_k - 0))
-kk_Val <- BIC_tracker_k[kk]
+kk <- which.min(abs(p_val_tracker_k - 0))
+kk_Val <- p_val_tracker_k[kk]
 kk_name <- var_names[kk]
 
 
@@ -143,7 +152,7 @@ df_i$variable_k <- df[[var_names[kk]]]
 
 var_names <- var_names[!var_names == kk_name]
 
-BIC_tracker_l <- matrix(NA, length(var_names))
+p_val_tracker_l <- matrix(NA, length(var_names))
 ###############################
 ## For L
 
@@ -157,16 +166,14 @@ for(l in 1:length(var_names)){
                        corr = corExp(form =~ Lat + Long | BiWeek))  
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_l <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_l[l] <- BIC_Val_l
-  
-  ## Ends the loop
+  p_val_tracker_l[l] <- p_val$`p-value`[5]
 }
 
-ll <- which.min(abs(BIC_tracker_l - 0))
-ll_Val <- BIC_tracker_l[ll]
+ll <- which.min(abs(p_val_tracker_l - 0))
+ll_Val <- p_val_tracker_l[ll]
 ll_name <- var_names[ll]
 
 
@@ -174,7 +181,7 @@ df_i$variable_l <- df[[var_names[ll]]]
 
 var_names <- var_names[!var_names == ll_name]
 
-BIC_tracker_m <- matrix(NA, length(var_names))
+p_val_tracker_m <- matrix(NA, length(var_names))
 ###############################
 ## For M
 
@@ -191,16 +198,15 @@ for(m in 1:length(var_names)){
   
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_m <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_m[m] <- BIC_Val_m
-
-  ## Ends the loop
+  p_val_tracker_m[m] <- p_val$`p-value`[6]
+  
 }
 
-mm <- which.min(abs(BIC_tracker_m - 0))
-mm_Val <- BIC_tracker_m[mm]
+mm <- which.min(abs(p_val_tracker_m - 0))
+mm_Val <- p_val_tracker_m[mm]
 mm_name <- var_names[mm]
 
 
@@ -213,7 +219,7 @@ var_names_2 <- var_names_2[!var_names_2 == kk_name]
 var_names_2 <- var_names_2[!var_names_2 == ll_name]
 var_names_2 <- var_names_2[!var_names_2 == mm_name]
 
-BIC_tracker_i_2 <- matrix(NA, length(var_names_2))
+p_val_tracker_i_2 <- matrix(NA, length(var_names_2))
 ###############################
 ## For i 2
 
@@ -230,16 +236,15 @@ for(i in 1:length(var_names_2)){
   
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_i <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_i_2[i] <- BIC_Val_i
+  p_val_tracker_i_2[i] <- p_val$`p-value`[2]
   
-  ## Ends the loop
 }
 
-ii_2 <- which.min(abs(BIC_tracker_i_2 - 0))
-ii_2_Val <- BIC_tracker_i_2[ii_2]
+ii_2 <- which.min(abs(p_val_tracker_i_2 - 0))
+ii_2_Val <- p_val_tracker_i_2[ii_2]
 ii_2_name <- var_names_2[ii_2]
 
 df_i$variable_i <- df[[var_names[ii_2]]]
@@ -248,7 +253,7 @@ var_names_2 <-var_names_2[!var_names_2 == ii_2_name]
 var_names_2[length(var_names_2)+1] <- jj_name
 
 
-BIC_tracker_j_2 <- matrix(NA, length(var_names_2))
+p_val_tracker_j_2 <- matrix(NA, length(var_names_2))
 ###############################
 ## For j 2
 
@@ -265,16 +270,15 @@ for(j in 1:length(var_names_2)){
   
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_j <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_j_2[j] <- BIC_Val_j
+  p_val_tracker_j_2[j] <- p_val$`p-value`[3]
   
-  ## Ends the loop
 }
 
-jj_2 <- which.min(abs(BIC_tracker_j_2 - 0))
-jj_2_Val <- BIC_tracker_j_2[jj_2]
+jj_2 <- which.min(abs(p_val_tracker_j_2 - 0))
+jj_2_Val <- p_val_tracker_j_2[jj_2]
 jj_2_name <- var_names_2[jj_2]
 
 df_i$variable_j <- df[[var_names_2[jj_2]]]
@@ -284,7 +288,7 @@ var_names_2 <- var_names_2[!var_names_2 == jj_2_name]
 
 var_names_2[length(var_names_2)+1] <- kk_name
 
-BIC_tracker_k_2 <- matrix(NA, length(var_names_2))
+p_val_tracker_k_2 <- matrix(NA, length(var_names_2))
 ###############################
 ## For k 2
 
@@ -301,16 +305,15 @@ for(k in 1:length(var_names_2)){
   
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_k <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_k_2[k] <- BIC_Val_k
+  p_val_tracker_k_2[k] <- p_val$`p-value`[4]
   
-  ## Ends the loop
 }
 
-kk_2 <- which.min(abs(BIC_tracker_k_2 - 0))
-kk_2_Val <- BIC_tracker_k_2[kk_2]
+kk_2 <- which.min(abs(p_val_tracker_k_2 - 0))
+kk_2_Val <- p_val_tracker_k_2[kk_2]
 kk_2_name <- var_names_2[kk_2]
 
 df_i$variable_k <- df[[var_names_2[kk_2]]]
@@ -320,7 +323,7 @@ var_names_2 <- var_names_2[!var_names_2 == kk_2_name]
 
 var_names_2[length(var_names_2)+1] <- ll_name
 
-BIC_tracker_l_2 <- matrix(NA, length(var_names_2))
+p_val_tracker_l_2 <- matrix(NA, length(var_names_2))
 ###############################
 ## For l 2
 
@@ -337,16 +340,15 @@ for(l in 1:length(var_names_2)){
   
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_l <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_l_2[l] <- BIC_Val_l
+  p_val_tracker_l_2[l] <- p_val$`p-value`[5]
   
-  ## Ends the loop
 }
 
-ll_2 <- which.min(abs(BIC_tracker_l_2 - 0))
-ll_2_Val <- BIC_tracker_l_2[ll_2]
+ll_2 <- which.min(abs(p_val_tracker_l_2 - 0))
+ll_2_Val <- p_val_tracker_l_2[ll_2]
 ll_2_name <- var_names_2[ll_2]
 
 df_i$variable_l <- df[[var_names_2[ll_2]]]
@@ -356,7 +358,7 @@ var_names_2 <- var_names_2[!var_names_2 == ll_2_name]
 
 var_names_2[length(var_names_2)+1] <- mm_name
 
-BIC_tracker_m_2 <- matrix(NA, length(var_names_2))
+p_val_tracker_m_2 <- matrix(NA, length(var_names_2))
 ###############################
 ## For m 2
 
@@ -373,16 +375,15 @@ for(m in 1:length(var_names_2)){
   
   
   Summary_Output <- summary(regress_model)
-  BIC_Val_m <- Summary_Output$BIC
+  p_val <-  as.data.frame(Summary_Output$tTable)
+  corr_table <- as.data.frame(Summary_Output$corBeta)
   
-  ## Make use of the BIC tracker and stors the BIC value for variable_i
-  BIC_tracker_m_2[m] <- BIC_Val_m
+  p_val_tracker_m_2[m] <- p_val$`p-value`[6]
   
-  ## Ends the loop
 }
 
-mm_2 <- which.min(abs(BIC_tracker_m_2 - 0))
-mm_2_Val <- BIC_tracker_m_2[mm_2]
+mm_2 <- which.min(abs(p_val_tracker_m_2 - 0))
+mm_2_Val <- p_val_tracker_m_2[mm_2]
 mm_2_name <- var_names_2[mm_2]
 
 df_i$variable_m <- df[[var_names_2[mm_2]]]
@@ -409,6 +410,23 @@ drops = c("Region_W", "Region_C", "Region_E", "Lat", "Long", "BiWeek")
 all_var <- all_var[ , !(names(all_var) %in% drops)]
 
 plot(all_var)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ###################################################################################################
 ## VIF
