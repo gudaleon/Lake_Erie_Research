@@ -1,4 +1,10 @@
-## df_i is a very bad variable name
+## Catrina Nowakowski 
+## From July 2016 to November 2016
+## UConn Civil and Environmental Engineering Department
+
+## Currently updating this script form the summer. 
+
+## df_i is a very bad variable name for this script..
 
 #source("Loading_Dataframe.R")
 
