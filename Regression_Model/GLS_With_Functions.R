@@ -4,13 +4,26 @@
 
 ## Currently updating this script form the summer. 
 
-## df_i is a very bad variable name for this script..
+## df_i is a very bad variable name
 
-#source("Loading_Dataframe.R")
+## Would be a good idea to add a third run through... later
+
+source("Loading_Dataframe.R")
 
 ###############################################################################################################
-## Function to run regression
+## This script runs a step wise variable slector to build a GLS regression model.
+## It uses the p-values to slect each new variable and the ACI and BIC values are tracked and plotted at the end
+# to see the progression of model fit quality.  This can be used to ditermine the point to run the slector to.  
+## The code can be run starting at step one to any step EX: variable_i to variable_k 
+# or variable_i to second look at Variable_k 
 
+
+
+###############################################################################################################
+## Function to run regression with anywhere from 1 to 5 variables
+## The reason why I made an additional function to run the model is to simplify running models for different situations
+# where I would use the ACI or BIC values to select the number of variables.
+## It also makes it easier to alter and modify the code.  
 
 gls_different_num_var <- function(num_of_var, df){
 
@@ -48,6 +61,7 @@ if(num_of_var == 1){
 
 ###############################################################################################################
 ## Function to produce sample output
+## This function removes the potential error of me messing up when I change how I run the regression model
 
 produce_sum_output <- function(regress_model, iteration, iterator){
   ## Produces a summery of the output, seperates the P-Value 
@@ -101,6 +115,7 @@ produce_sum_output <- function(regress_model, iteration, iterator){
 
 ###############################################################################################################
 ## Function to find the best variable
+## This function is a follow up for processing after the loop that is used to apply the previous functions
 
 
 best_var <- function(p_Val_tracker, var_names, df_i, df, iteration){
@@ -495,11 +510,17 @@ AIC_BIC_It <- 1 + AIC_BIC_It
 
 #################################################################
 ## Remove Current variable names in use from the list
-var_names_2 <- var_names_2[!var_names_2 == jj_name]
-var_names_2 <- var_names_2[!var_names_2 == kk_name]
-var_names_2 <- var_names_2[!var_names_2 == ll_name]
-var_names_2 <- var_names_2[!var_names_2 == mm_name]
+# var_names_2 <- var_names_2[!var_names_2 == jj_name]
+# var_names_2 <- var_names_2[!var_names_2 == kk_name]
+# var_names_2 <- var_names_2[!var_names_2 == ll_name]
+# var_names_2 <- var_names_2[!var_names_2 == mm_name]
 
+#################################################################
+## Remove Current variable names in use from the list
+var_names_2 <- var_names_2[!var_names_2 == jj_2_name]
+var_names_2 <- var_names_2[!var_names_2 == kk_2_name]
+var_names_2 <- var_names_2[!var_names_2 == ll_2_name]
+var_names_2 <- var_names_2[!var_names_2 == mm_2_name]
 ###############################################################################################################
 ## For Variable i
 
@@ -683,7 +704,7 @@ AIC_BIC_It <- 1 + AIC_BIC_It
 regress_model_final <- gls_different_num_var(5, df_i)
   
   
-  
+## Testing autocorrelations using the best ACI value.    
 # corAR1 659.7716 265.0276
 # corExp 640.406 230.1096
 # corGaus 641.7344 229.6906
@@ -712,18 +733,13 @@ print(Vif_Numbers)
 ###################################################################################################
 ## Checking the Regression
 library(cvTools)
-Chlor = df$Chlor
+Chlor = df_i$Chlor
 
-The_Cross_Val <- cvFit(regress_model_final, data = df_i, y = Chlor )
+The_Cross_Val <- cvFit(regress_model_final, data = df_i, y = Chlor, K =round((length(df_i$Region_W)*.1), 0)  )
 print(The_Cross_Val)
 
-
-# 
-# library(cvTools)
-# Chlor = df$Chlor_Log
-# 
-# The_Cross_Val <- cvFit(regress_model_final, data = df_i, y = Chlor, K = length(df$Region_W))
-# print(The_Cross_Val)
+The_Cross_Val <- cvFit(regress_model_final, data = df_i, y = Chlor, K =length(df_i$Region_W)  )
+print(The_Cross_Val)
 
 
 
@@ -733,10 +749,6 @@ print(The_Cross_Val)
 
 ## outputs mean bias lower the better
 
-
-## FInd a way to plot and set K = n
-
-
 ###################################################################################################
 Summary_Output <- summary(regress_model_final)
 print(Summary_Output)
@@ -745,7 +757,7 @@ print(Summary_Output)
 corelation_data_frame <- data.frame(variable_i = df_i$variable_i, variable_j = df_i$variable_j,
                                     variable_k = df_i$variable_k, variable_l = df_i$variable_l,
                                     variable_m = df_i$variable_m)
-names(corelation_data_frame)<- c(ii_name, jj_name, kk_name, ll_name, mm_name)
+names(corelation_data_frame)<- c(ii_2_name, jj_2_name, kk_2_name, ll_2_name, mm_2_name)
 corelation <- cor(corelation_data_frame)
 print(corelation)
 
@@ -757,8 +769,11 @@ colnames(ACI_BIC) <- c("ACI", "BIC")
 
 ACI_BIC$x <- 1:length(ACI_BIC$ACI)
 
-## FINISH THIS HEre
 
+## This plot is to take a look at each model run from every step above. All of the ACI and BIC values
+# where saved and this plot shows them inorder to track to progression of the models created, negative
+# slopes indicate the the next model run was better and positive slopes indicate that the next model
+# run is not as good as the previos one
 AIC_BIC_Plot <- ggplot(ACI_BIC, aes(x)) +
                   geom_line(aes(y = ACI), color = "red") +
                   geom_point(aes(y = ACI), color = "red") +
