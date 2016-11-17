@@ -1,3 +1,10 @@
+## Catrina Nowakowski 
+## From July 2016 to November 2016
+## UConn Civil and Environmental Engineering Department
+
+## Currently updating this script form the summer. 
+
+
 ###################################################################################################
 ## Librarys
 library(foreign)
@@ -61,14 +68,20 @@ Data$Taverage_by_water_shed <- (Data$Tmax_by_water_shed +Data$Tmin_by_water_shed
 
 ###################################################################################################
 ## Grab Chlor
-df <- Data[!is.na(Data$Chlor), ]
+
+## MAKE SURE YOU CHOOSE LOG OR NO LOG
+# df <- Data[!is.na(Data$Chlor), ]
+
+df <- Data[!is.na(Data$Chlor_Log), ]
+
+
 
 ## Change all NA values to zero
 #df$Q_cfs[is.na(df$Q_cfs)] <- 0
 
 
 ## Take out high chlor 
-df <- df[df$Chlor < 15,]
+#df <- df[df$Chlor < 15,]
 
 
 ###################################################################################################
@@ -303,6 +316,10 @@ df <- lag(-5, "SM2", df)
 df <- lag(-3, "SM3", df)
 df <- lag(-4, "SM3", df)
 
+###################################################################################################
+## Get Rid of all NA values left in df
+
+df[is.na(df)] <- 0
 
 ###################################################################################################
 ## Initialize Data Frame
