@@ -1,3 +1,8 @@
+## Catrina Nowakowski
+## November 27, 2016
+
+## Project:  Prediction of harmful water quality parameters combining weather, air quality and ecosystem models with in-situ measurements
+
 ## List of file names
 file_names <- c("Hydro_Sta3_a.csv", "Hydro_Sta4.csv","Hydro_Sta5.csv","Hydro_Sta6_a.csv","Hydro_Sta7.csv","Hydro_Sta8_a.csv",
                 "Hydro_Sta9.csv","Hydro_Sta10_a.csv","Hydro_Sta11_a.csv","Hydro_Sta12.csv","Hydro_Sta17.csv","Hydro_Sta18_a.csv")
