@@ -15,7 +15,7 @@
 
 ## Iniate n and df, df is so I don't mess df_i up
 # if n is a factor of 112 then comment out the two remander sections, if not be sure to include them
-n = 14
+n = 4
 df_i <- as.data.frame(df_i)
 df <- as.data.frame(df_i)
 
@@ -183,8 +183,11 @@ one_to_one <- qplot(x,y) +
 print(one_to_one)
 
 }
-
-
+show(AIC_BIC_Plot)
+print(Vif_Numbers)
+print(Summary_Output)
+print(corelation)
+plot(corelation_data_frame)
 
 ## END PDF
 dev.off()
