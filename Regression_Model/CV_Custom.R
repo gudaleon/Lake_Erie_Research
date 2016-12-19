@@ -15,11 +15,11 @@
 
 ## Iniate n and df, df is so I don't mess df_i up
 # if n is a factor of 112 then comment out the two remander sections, if not be sure to include them
-n = 4
+n = 112
 df_i <- as.data.frame(df_i)
 df <- as.data.frame(df_i)
 
-## iniates names vector
+## iniates names vectors
 sample_name <- matrix(data = NA, nrow = 1, ncol = n)
 set_name <- matrix(data = NA, nrow = 1, ncol = n)
 regress_name <- matrix(data = NA, nrow = 1, ncol = n)
@@ -138,8 +138,34 @@ names(Predictions) <- c(prediction_names, measured_val_names)
 
 
 ###################################################################################################
+## Merging all of the predictions in to one data frame
+
+predict <- rbind.data.frame(prediction_1, prediction_2)
+for(i in 3:n){
+  predict <- rbind.data.frame(predict, get(prediction_names[i]) )
+}
+names(predict) <- c("Log_Predictions")
+
+
+###################################################################################################
+## Merging all of the observations in to one data frame
+obser <- rbind.data.frame(Chlor_1, Chlor_2)
+for(i in 3:n){
+  obser <- rbind.data.frame(obser, get(measured_val_names[i]) )
+}
+names(obser) <- c("Log_Observations")
+
+
+###################################################################################################
+## Binding the Predictions and observations into the same dataframe
+One_To_One_df <- cbind(obser, predict)
+One_To_One_df$Observations <- exp(One_To_One_df$Log_Observations)
+One_To_One_df$Predictions <- exp(One_To_One_df$Log_Predictions)
+
+###################################################################################################
 ## Making all of the Plots!!
 # x is sample and Y is predicted
+library(ggplot2)
 pdf("D:/OneDrive/Documents/School-Catrina/Research/Code Post Conferance/Regression Model/CV_Plots.pdf")
 
 #########################
@@ -155,39 +181,91 @@ RMSE <- round(sqrt( sum( (y$Predicted - x$Samples)^2 , na.rm = TRUE ) / length(y
 
 Correla <-  round(cor(x$Samples, y$Predicted, use="complete"), 3)
 
-one_to_one <- qplot(x,y) + 
+one_to_one <- qplot(((x)),(y)) + 
   geom_abline(intercept = 0, colour = "red", size = 1) + 
   geom_smooth(method = "lm", se = FALSE) +
   annotate("text", x = 2.5, y = 0, size = 5,label =paste0("R2: ", Correla )) +
   annotate("text", x = 2.5, y = .5, size = 5,label =paste0("RMSE: ", RMSE )) +
-  xlab("Sample Chlorophyll") + ylab("Predicted Chlorophyll")
+  xlab("Sample Chlorophyll ln(ug/L)") + ylab("Predicted Chlorophyll ln(ug/L)")
 print(one_to_one)
 
 
+#########################
+## Grab vs the predicted One to one
+x <-  as.data.frame(One_To_One_df$Observations)
+names(x) <- c("Samples")
 
-for(i in 1:n){
-x <- Predictions[, (n+i)]
-y <- Predictions[, i]
+y <-  as.data.frame(One_To_One_df$Predictions)
+names(y) <- c("Predicted")
+y_no_na <- y[!is.na(y)]
 
-RMSE[i] <- round(sqrt( sum( (y - x)^2 , na.rm = TRUE ) / length(y)), 3)
+RMSE <- round(sqrt( sum( (y$Predicted - x$Samples)^2 , na.rm = TRUE ) / length(y_no_na)), 3)
 
-Correla[i] <-  round(cor(x, y, use="complete"), 3)
+Correla <-  round(cor(x$Samples, y$Predicted, use="complete"), 3)
 
-one_to_one <- qplot(x,y) +
-  geom_abline(intercept = 0, colour = "red", size = 1) +
+one_to_one <- qplot((x),(y)) + 
+  geom_abline(intercept = 0, colour = "red", size = 1) + 
   geom_smooth(method = "lm", se = FALSE) +
-  annotate("text", x = 1, y = 0, size = 5,label =paste0("R2: ", Correla[i] )) +
-  annotate("text", x = 1, y = .5, size = 5,label =paste0("RMSE: ", RMSE[i] )) +
-  xlab("Sample Chlorophyll") + ylab("Predicted Chlorophyll") +
-  ggtitle(paste("Group", i))
+  annotate("text", x = 20, y = 0, size = 5,label =paste0("R2: ", Correla )) +
+  annotate("text", x = 20, y = 2.5, size = 5,label =paste0("RMSE: ", RMSE )) +
+  xlab("Sample Chlorophyll (ug/L)") + ylab("Predicted Chlorophyll (ug/L)")
 print(one_to_one)
 
-}
-show(AIC_BIC_Plot)
-print(Vif_Numbers)
-print(Summary_Output)
-print(corelation)
-plot(corelation_data_frame)
+
+#########################
+## Grab vs the predicted One to one with out points over 30
+One_To_One_df_Alter <- One_To_One_df[One_To_One_df$Observations < 30, ]
+
+x <-  as.data.frame(One_To_One_df_Alter$Observations)
+names(x) <- c("Samples")
+
+y <-  as.data.frame(One_To_One_df_Alter$Predictions)
+names(y) <- c("Predicted")
+y_no_na <- y[!is.na(y)]
+
+RMSE <- round(sqrt( sum( (y$Predicted - x$Samples)^2 , na.rm = TRUE ) / length(y_no_na)), 3)
+
+Correla <-  round(cor(x$Samples, y$Predicted, use="complete"), 3)
+
+one_to_one <- qplot((x),(y)) + 
+  geom_abline(intercept = 0, colour = "red", size = 1) + 
+  geom_smooth(method = "lm", se = FALSE) +
+  annotate("text", x = 15, y = 0, size = 5,label =paste0("R2: ", Correla )) +
+  annotate("text", x = 15, y = 2.5, size = 5,label =paste0("RMSE: ", RMSE )) +
+  xlab("Sample Chlorophyll (ug/L)") + ylab("Predicted Chlorophyll (ug/L)")
+print(one_to_one)
+
+
+
+
+
+#########################
+## Group Plots
+# 
+# 
+# for(i in 1:n){
+# x <- Predictions[, (n+i)]
+# y <- Predictions[, i]
+# 
+# RMSE[i] <- round(sqrt( sum( (y - x)^2 , na.rm = TRUE ) / length(y)), 3)
+# 
+# Correla[i] <-  round(cor(x, y, use="complete"), 3)
+# 
+# one_to_one <- qplot((10^x),(10^y)) +
+#   geom_abline(intercept = 0, colour = "red", size = 1) +
+#   geom_smooth(method = "lm", se = FALSE) +
+#   annotate("text", x = 1, y = 0, size = 5,label =paste0("R2: ", Correla[i] )) +
+#   annotate("text", x = 1, y = .5, size = 5,label =paste0("RMSE: ", RMSE[i] )) +
+#   xlab("Sample Chlorophyll") + ylab("Predicted Chlorophyll") +
+#   ggtitle(paste("Group", i))
+# print(one_to_one)
+# 
+# }
+# show(AIC_BIC_Plot)
+# print(Vif_Numbers)
+# print(Summary_Output)
+# print(corelation)
+# plot(corelation_data_frame)
 
 ## END PDF
 dev.off()
@@ -198,3 +276,16 @@ print(mean_RMSE)
 mean_Correla <- mean(Correla)
 print("R^2")
 print(mean_Correla)
+
+
+#############################################################################################
+print("writing csv") 
+## To write a CSV file for input to Excel one might use
+
+One_To_One_df$in_sample_chlor <- exp(df_i$Chlor)
+One_To_One_df$in_sample_predic <- exp(predict(in_sample)
+
+The_CSV_Name <- "Sample_Predicted.csv"
+
+write.table(One_To_One_df, file = The_CSV_Name, sep = ",", col.names = NA,
+            qmethod = "double")
