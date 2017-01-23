@@ -1,39 +1,38 @@
-## Figure out the dates for each year!
+## Catrina Nowakowski
+## Summer 2016 - November 2016
 
+## Project:  Prediction of harmful water quality parameters combining weather, air quality and ecosystem models with in-situ measurements
+
+## This script takes the watersheds and aggragates the variables across each and then writes a CSV file for each variable that includes the
+# new number, date, and watershed id
+
+## Note:
+# Run the process_NETCDF_Data_For_Use.R file first
+# This has the dates changed to 04-01-2002 and 10-31-2002 
+# for the variable names you eddited it, if you run the 40 min code again it you have to fix the file
 
 
 #############################################################################################
-## Reads in files
+## Reads in the variable
 
-Water_Sheds <- read.csv("Water_Sheds_Hand.csv")
-Variable_Names <- read.csv("all_var_name.csv")
+Variable_Names <- read.csv("Var_Name_List.csv", header = FALSE, stringsAsFactors = FALSE)
 
-## Format the list
 
 ## Loop through the list to load each variable file:
-for(The_Var_Name in Variable_Names){
+for(The_Var_Name in Variable_Names$V1){
   file_name <- paste0(The_Var_Name, ".csv")
   a <- read.csv(file_name, header = TRUE)
   assign(The_Var_Name, a)
 }
 
-#############################################################################################
-## Drops extra variables:
-drops <- c("FID_1","FID_2", "TNMID", "METASOURCE", "SOURCEDATA", "SOURCEORIG", "SOURCEFEAT", 
-           "LOADDATE", "GNIS_ID", "X", "NAME", "HUC8", "AREAACRES", "AREASQKM", "STATES")
-Water_Sheds <- Water_Sheds[ , !(names(Water_Sheds) %in% drops)]
 
-## Drops extra variables:
+Water_Sheds <- read.csv("Water_Sheds_Hand.csv")
 
-for(i in Variable_Names){
-  drops <- c("X")
-  a <- get(i)
-  a <- a[ , !(names(a) %in% drops)]
-  assign(i,a)
-}
 
 #############################################################################################
-## Identify the water sheds
+## Identifie the watersheds 
+
+
 Each_Water_Shead <- unique(Water_Sheds$Water_Shed)
 
 ## pull out the lat and long for that water shed
@@ -53,7 +52,7 @@ for(i in 1:length(Each_Water_Shead)){
   Names_Water_Sheds[i] <- paste0("Water_Shed_", i)
 }
 
-
+## Make the watershed names
 for(i in Names_Water_Sheds){
   a <- get(i)
   
@@ -65,10 +64,34 @@ for(i in Names_Water_Sheds){
 }
 
 
+
+#############################################################################################
+## Format the variable
+
+## Drops extra variables from watersheds:
+drops <- c("FID_1","FID_2", "TNMID", "METASOURCE", "SOURCEDATA", "SOURCEORIG", "SOURCEFEAT", 
+           "LOADDATE", "GNIS_ID", "X", "NAME", "HUC8", "AREAACRES", "AREASQKM", "STATES")
+
+Water_Sheds <- Water_Sheds[ , !(names(Water_Sheds) %in% drops)]
+
+## Drops extra column from the variable:
+for(i in Variable_Names$V1){
+drops <- c("X")
+a <- get(i)
+a <- a[ , !(names(a) %in% drops)]
+assign(i,a)
+}
+
+
 #############################################################################################
 ## Function For just one water shed
 
-agg_by_water_shead <- function(Variable, water_shed){
+agg_by_water_shead <- function(Variable, water_shed, year){
+  
+  # Variable <- get("Radiation_2002")
+  # water_shed <- Water_Shed_1
+  # year = 2002
+  # 
   
   ## Merge the data
   water_shed_merge <- merge(Variable, water_shed)
@@ -77,7 +100,8 @@ agg_by_water_shead <- function(Variable, water_shed){
   Water_Shed <- water_shed_merge$Water_Shed[1]
   
   ## Drop out the identifers to aggragate
-  drops <- c("Lat", "Long", "X", "NAME", "AREAACRES", "AREASQKM", "STATES", "HUC8", "Water_Shed")
+  drops <- c("Lat", "Long", "X", "NAME", "AREAACRES", "AREASQKM", "STATES", "HUC8", "Water_Shed", "TNMID", 
+             "METASOURCE", "SOURCEORIG", "SOURCEFEAT", "LOADDATE", "GNIS_ID", "SOURCEDATA", "FID_1", "FID_2")
   water_shed_merge <- water_shed_merge[ , !(names(water_shed_merge) %in% drops)]
   
   ## aggragate each column (this gives the average for the day for the water shed)
@@ -86,7 +110,9 @@ agg_by_water_shead <- function(Variable, water_shed){
   
   
   ## Make singular water shead data frame:
-  dates <- seq(as.Date("2007-05-01"), as.Date("2007-10-27"), by="days")
+  date_st <- paste0(year, "-04-01")
+  date_end <- paste0(year, "-10-31")
+  dates <- seq(as.Date(date_st), as.Date(date_end), by="days")
   Water_Shed_Data <- data.frame(Date = dates, the_data = water_shed_agg, Water_Shed = Water_Shed)
   
   
@@ -96,8 +122,10 @@ agg_by_water_shead <- function(Variable, water_shed){
 
 #############################################################################################
 ## For variables loop through all of the water sheds
-for(i in Variable_Names){
+for(i in Variable_Names$V1){
   Variable <- get(i)
+  year <- unlist(strsplit(i, "_", fixed = TRUE))
+  year <- year[length(year)]
   
   ####################################################
   ## Round off some issues 
@@ -113,7 +141,7 @@ for(i in Variable_Names){
   
   for(j in Names_Water_Sheds){
     
-    function_return <- agg_by_water_shead(Variable, get(j))
+    function_return <- agg_by_water_shead(Variable, get(j), year)
     colnames(function_return)[2] <- i
     colnames(Final_Data)[2] <- i
     

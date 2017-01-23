@@ -36,7 +36,8 @@ var_names <- c("Radiation", "Tmax", "Tmin", "Precipitation", "R_humidity", "Wind
 
 file_names <- c("site_weather_dep_20020101_to_20021231.nc", "site_weather_dep_20030101_to_20031231.nc", 
                 "site_weather_dep_20040101_to_20041231.nc", "site_weather_dep_20050101_to_20051231.nc", 
-                "site_weather_dep_20060101_to_20061231.nc")
+                "site_weather_dep_20060101_to_20061231.nc", "site_weather_dep_20070101_to_20071231.nc", 
+                "site_weather_dep_20080101_to_20081231.nc", "site_weather_dep_20090101_to_20091231.nc")
 
 #############################################################################################
 ## Function to Pull NETCDF Variables 
@@ -109,8 +110,8 @@ Mat_to_Data_Frame <- function(Var, Lat_Long) {
   }
   
   #############################################################################################
-  ## Grabing days 121 through 300:
-  Var <- Var[,121:300]
+  ## Grabing days 91 through 304: april fools day to halloween 
+  Var <- Var[,91:304]
   
   
   #############################################################################################
@@ -159,13 +160,12 @@ Mat_to_Data_Frame <- function(Var, Lat_Long) {
 
 #initiate all_var_name list:
 all_var_name <- rep(NA, length(var_names)*length(file_names))
-
-for(The_File in file_names){
-
 #Tracks the Year  
 i = 2002
 #Tracks the variable name list
 j = 1
+
+for(The_File in file_names){
 
 for(The_Variable in var_names){
   
@@ -191,11 +191,9 @@ i = i + 1
 }
 
 #############################################################################################
-
-
-#############################################################################################
-## Write a CSV file for input to Excel 
 print("writing csv") 
+## To write a CSV file for input to Excel one might use
+
 The_CSV_Name <- "Var_Name_List.csv"
 
 write.table(all_var_name, file = The_CSV_Name, sep = ",", col.names = NA,
