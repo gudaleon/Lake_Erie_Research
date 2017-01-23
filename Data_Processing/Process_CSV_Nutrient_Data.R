@@ -4,11 +4,16 @@
 ## Project:  Prediction of harmful water quality parameters combining weather, air quality and ecosystem models with in-situ measurements
 
 
-## What does this file do?
+## Made a key in this file to deal with the lat and long col row thing that Ellen explained in an email once upon a time
 
 
 
 ## Note used lat_long file again, checked out and it all lines up correct!
+#############################################################################################
+## Load the longitude and Latitude for all files
+print("Reading Latitude and Longitude...")
+
+Lat_Long <- read.csv("longitude_latitude.csv", header = TRUE)
 
 #############################################################################################
 ## Make a table of the locations for lat and long to make sense of this row column stuff
@@ -18,7 +23,7 @@
 # And so gridid’s should run from 1 through 137241.  You may already have this file, but I am having a 
 # file titled “beld…” put up that should provide additional links with lat/long, etc.
 
-Lat_Long_Position<- c(1:137241)
+Lat_Long_Position<- c(1:length(Lat_Long$Longitude))
 Lat_Long_Position <- split(Lat_Long_Position, 1:299)
 Lat_Long_Position <- as.data.frame(Lat_Long_Position)
 Lat_Long_Position <- t(Lat_Long_Position)
@@ -34,11 +39,6 @@ Lat_Long_Position <- t(Lat_Long_Position)
 ## Format date column
 ## Pull the dates and area I want
 
-#############################################################################################
-## Load the longitude and Latitude for all files
-print("Reading Latitude and Longitude...")
-
-Lat_Long <- read.csv("longitude_latitude.csv", header = TRUE)
 
 #############################################################################################
 ## Making list of File names
@@ -53,7 +53,6 @@ for(i in file_names){
   ## Read in file, IT TAKES FOREVER!
   a <- read.csv(i, header = TRUE)
   assign(paste0("Nutrient_", year), a)
-  rm(a)
   
   ##Save the Name of the file
   file_var_name <- paste0("Nutrient_", year)
@@ -61,10 +60,44 @@ for(i in file_names){
   ##Makes List of variable names
   var_names <- names(get(file_var_name))
   
+  ##Grabs Dates april 1st - oct 30th
+  if(year == 2003){
+    a <- a[a$DATE <= 91 & a$DATE >= 304, ]
+  }else if(year == 2004){
+    a <- a[a$DATE <= 92 & a$DATE >= 305, ]
+  }else if(year == 2005){
+    a <- a[a$DATE <= 91 & a$DATE >= 304, ]
+  }
+  
+  ## Make singular water shead data frame:
+  
+  ## Make another key! One with the date number and then the actual date next to it
+  # then loop through the date numbers and replace them with the actual date in a new coumn
+  # Drop old date column
+  
+  date_st <- paste0(year, "-05-01")
+  date_end <- paste0(year, "-10-27")
+  dates <- seq(as.Date(date_st), as.Date(date_end), by="days")
+  
+  ##Adds Lat and Long Column
+  a$Lat <- NA
+  a$Long <- NA
+  for(j in 1:length(a$Date) ){ ##get(file_var_name)
+    col <-a$col[j]
+    row <-a$row[j]
+    
+    Location <- Lat_Long_Position[row, col]
+    
+    a$Lat[j] <- Lat_Long$Latitude[Location]
+    a$Long[j] <- Lat_Long$Longitude[Location]    
+  }
+  
+  
   ## Loops through and makes each variable a seperate thing CHANGE THIS TO WHAT YOU WROTE ABOVE 
   for(var in var_names){
     a <- get(file_var_name)
-    assign(var, a[var_name])
+    a <- data.frame(a[var], a["Date"], a["Lat"], a["Long"])
+    assign(var, a)
   }
   
   ## removes the whole matrix to make sure there is enough space
