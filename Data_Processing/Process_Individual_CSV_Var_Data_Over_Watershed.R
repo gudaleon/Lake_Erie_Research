@@ -88,10 +88,10 @@ assign(i,a)
 
 agg_by_water_shead <- function(Variable, water_shed, year){
   
+  # A check on the function
   # Variable <- get("Radiation_2002")
   # water_shed <- Water_Shed_1
   # year = 2002
-  # 
   
   ## Merge the data
   water_shed_merge <- merge(Variable, water_shed)
@@ -108,13 +108,20 @@ agg_by_water_shead <- function(Variable, water_shed, year){
   water_shed_agg <- colMeans(water_shed_merge)
   water_shed_agg <- as.data.frame(water_shed_agg)
   
-  
+  if(year != 2004 | year != 2008){
   ## Make singular water shead data frame:
   date_st <- paste0(year, "-04-01")
+  date_end <- paste0(year, "-11-01")
+  dates <- seq(as.Date(date_st), as.Date(date_end), by="days")
+  Water_Shed_Data <- data.frame(Date = dates, the_data = water_shed_agg, Water_Shed = Water_Shed)
+  }else if(year == 2004 | year == 2008){
+  ## Make singular water shead data frame:
+  date_st <- paste0(year, "-03-31")
   date_end <- paste0(year, "-10-31")
   dates <- seq(as.Date(date_st), as.Date(date_end), by="days")
   Water_Shed_Data <- data.frame(Date = dates, the_data = water_shed_agg, Water_Shed = Water_Shed)
-  
+    
+  }
   
   
   return(Water_Shed_Data)

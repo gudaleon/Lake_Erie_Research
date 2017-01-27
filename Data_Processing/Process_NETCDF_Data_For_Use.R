@@ -110,8 +110,8 @@ Mat_to_Data_Frame <- function(Var, Lat_Long) {
   }
   
   #############################################################################################
-  ## Grabing days 91 through 304: april fools day to halloween 
-  Var <- Var[,91:304]
+  ## Grabing days 91 through 304: april fools day to halloween and then the day before and after some years
+  Var <- Var[,91:305]
   
   
   #############################################################################################

@@ -91,11 +91,20 @@ for(i in Variable_Names$V1){
   year <- unlist(strsplit(i, "_", fixed = TRUE))
   year <- year[length(year)]
   
-  #Create Dates
-  date_st <- paste0(year, "-04-01")
-  date_end <- paste0(year, "-10-31")
-  dates <- seq(as.Date(date_st), as.Date(date_end), by="days")
-  
+
+  if(year != 2004 | year != 2008){
+    ## Make singular water shead data frame:
+    date_st <- paste0(year, "-04-01")
+    date_end <- paste0(year, "-11-01")
+    dates <- seq(as.Date(date_st), as.Date(date_end), by="days")
+    
+  }else if(year == 2004 | year == 2008){
+    ## Make singular water shead data frame:
+    date_st <- paste0(year, "-03-31")
+    date_end <- paste0(year, "-10-31")
+    dates <- seq(as.Date(date_st), as.Date(date_end), by="days")
+    
+  }
   
   for(j in 1:length(Points)){
     
